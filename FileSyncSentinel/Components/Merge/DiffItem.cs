@@ -2,8 +2,8 @@
  * Author: Nikolay Dvurechensky
  * Site: https://sites.google.com/view/dvurechensky
  * Gmail: dvurechenskysoft@gmail.com
- * Last Updated: 27 ноября 2025 06:53:17
- * Version: 1.0.27
+ * Last Updated: 28 ноября 2025 09:09:43
+ * Version: 1.0.28
  */
 
 using DiffPlex.DiffBuilder.Model;
