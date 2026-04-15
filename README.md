@@ -12,74 +12,100 @@
     <img src="https://shields.dvurechensky.pro/badge/JSON-Configuration-lightgrey?logo=json&logoColor=white"> 
     <img src="https://shields.dvurechensky.pro/badge/Costura-Fody%20Packager-lightgrey?logo=packagist&logoColor=white"> 
   </p> 
-  <h3 align="center"><span style="color:#F5F752;">Мощный</span> мониторинг изменений файлов в <span style="color:#377;">реальном времени</span> с <span style="color:#15F752;">интеллектуальным сравнением 🔍</span></h3>
+  <h3 align="center">
+    <span style="color:#F5F752;">Powerful</span> real-time file monitoring with 
+    <span style="color:#15F752;">intelligent comparison 🔍</span>
+  </h3>
 </p>
 
-- [🚀 О проекте](#-о-проекте)
-  - [🎯 Основные задачи](#-основные-задачи)
-- [🛠 Технологии](#-технологии)
-- [🚀 Установка и запуск](#-установка-и-запуск)
-  - [Актуальная версия](#актуальная-версия)
-  - [Системные требования](#системные-требования)
-- [⚡ Быстрый старт](#-быстрый-старт)
-
-## 🚀 О проекте
-
-**FileSync Sentinel** - это профессиональная система мониторинга, созданная для потоковой работы в реальном времени. Приложение обеспечивает точное отслеживание только `изменений` файлов конкретного расширения с возможностью интеллектуального сравнения и синхронизации.
-
-_🛠 Что-то вроде портативного Github Desktop но без внешнего репозитория где-либо и с ограниченными возможностями 💖_
-
-![alt text](docs/FileSyncSentinelInfo.gif)
-
-### 🎯 Основные задачи
-
-- **Наблюдение за папкой `Out`** (`LizeriumChangesGame`) - отслеживание `изменений` файлов в течение дня
-- **Сравнение с папкой `In`** (`LizeriumINI`) - эталонная директория для сравнения
-- **Гибкая настройка форматов** - точное указание отслеживаемых файлов (поддержка десятков тысяч `.ini` файлов)
-- **Детальное логирование** - фиксация всех изменений в лог-файл
-- **Визуальное сравнение** - просмотр точных изменений между файлами
-- **Интеллектуальная синхронизация** - применение изменений к файлам или папкам одной кнопкой
-
-> [!IMPORTANT]
-> FileSync Sentinel 📁 смотрит только за `изменениями` уже `существующих` файлов в папке `Out`! Не за их созданием где либо, а строго за `изменениями`.
-
-## 🛠 Технологии
-
-- **WinForms** - современный desktop интерфейс
-- **NET 8.0** - последняя версия фреймворка
-- **MVC Pattern** - чистая архитектура приложения
-- **NuGet пакеты:**
-  - `DiffPlex` - интеллектуальное сравнение файлов
-  - `Newtonsoft.Json` - работа с конфигурацией
-- **Дополнительные компоненты:**
-  - **FastColoredTextBoxNet8** - кастомная реализация для .NET 8.0 (форк библиотеки [Pavel Torgashov](https://github.com/PavelTorgashov/FastColoredTextBox))
-  - **Подсветка различий** - как в `VSCode`, `WinMerge`, `Beyond Compare`
-
-## 🚀 Установка и запуск
-
-### Актуальная версия
-
-Доступна в разделе **Release** проекта
-
-### Системные требования
-
-- **.NET 8.0 Desktop Runtime**
-  - [x64 версия](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-8.0.18-windows-x64-installer)
-  - [x86 версия](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-8.0.18-windows-x86-installer)
-
-## ⚡ Быстрый старт
-
-1. Скачайте и установите `.NET 8.0 Desktop Runtime`
-2. Загрузите последнюю версию из раздела `Release`
-3. Настройте `пути` к папкам `в конфигурации`
-4. Укажите отслеживаемый `формат` файлов
-5. Запустите мониторинг!
-
-> [!IMPORTANT]
-> FileSync Sentinel 📁 смотрит только за одним конкретным `расширением` файлов в папке `Out`, например только за `*.ini` если укажете или за `*.json`!
+<div align="center" style="margin: 20px 0; padding: 10px; background: #1c1917; border-radius: 10px;">
+  <strong>🌐 Language: </strong>
+  
+  <a href="./README.ru.md" style="color: #F5F752; margin: 0 10px;">
+    🇷🇺 Russian
+  </a>
+  | 
+  <span style="color: #0891b2; margin: 0 10px;">
+    ✅ 🇺🇸 English (current)
+  </span>
+</div>
 
 ---
 
-<p align="center"><em>✨ Профессиональный контроль изменений для ваших проектов ✨</em></p>
+- [🚀 About the Project](#-about-the-project)
+  - [🎯 Core Objectives](#-core-objectives)
+- [🛠 Technologies](#-technologies)
+  - [NuGet Packages:](#nuget-packages)
+  - [Additional Components:](#additional-components)
+- [🚀 Installation \& Launch](#-installation--launch)
+  - [Latest Version](#latest-version)
+  - [System Requirements](#system-requirements)
+- [⚡ Quick Start](#-quick-start)
+
+## 🚀 About the Project
+
+**FileSync Sentinel** is a professional real-time monitoring system designed for continuous file tracking workflows.  
+The application focuses on detecting **changes** in files of a specific extension, with support for intelligent comparison and synchronization.
+
+_🛠 Think of it as a lightweight, portable GitHub Desktop — but without any external repository, focused purely on local workflows 💖_
+
+![alt text](docs/FileSyncSentinelInfo.gif)
+
+### 🎯 Core Objectives
+
+- **Monitor `Out` directory** (`LizeriumChangesGame`) — track file **changes** throughout the day
+- **Compare with `In` directory** (`LizeriumINI`) — reference baseline directory
+- **Flexible format configuration** — precise control over tracked file types (supports tens of thousands of `.ini` files)
+- **Detailed logging** — record all detected changes into log files
+- **Visual diff viewer** — inspect exact differences between files
+- **Intelligent synchronization** — apply changes to files or entire directories with a single click
+
+> [!IMPORTANT]  
+> FileSync Sentinel 📁 monitors only **changes of existing files** in the `Out` directory —  
+> it does **not** track file creation elsewhere.
+
+## 🛠 Technologies
+
+- **WinForms** — modern desktop UI
+- **.NET 8.0** — latest framework version
+- **MVC Pattern** — clean application architecture
+
+### NuGet Packages:
+
+- `DiffPlex` — intelligent file comparison
+- `Newtonsoft.Json` — configuration handling
+
+### Additional Components:
+
+- **FastColoredTextBoxNet8** — custom .NET 8.0 implementation (fork of [Pavel Torgashov](https://github.com/PavelTorgashov/FastColoredTextBox))
+- **Diff highlighting** — similar to `VSCode`, `WinMerge`, `Beyond Compare`
+
+## 🚀 Installation & Launch
+
+### Latest Version
+
+Available in the **Releases** section of the project
+
+### System Requirements
+
+- **.NET 8.0 Desktop Runtime**
+  - [x64 version](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-8.0.18-windows-x64-installer)
+  - [x86 version](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-8.0.18-windows-x86-installer)
+
+## ⚡ Quick Start
+
+1. Install `.NET 8.0 Desktop Runtime`
+2. Download the latest release from the `Releases` section
+3. Configure paths to your directories in the configuration file
+4. Specify the file format to monitor
+5. Start monitoring!
+
+> [!IMPORTANT]  
+> FileSync Sentinel 📁 monitors only **one specific file extension** in the `Out` directory  
+> (e.g. `*.ini`, `*.json`, etc.)
+
+---
+
+<p align="center"><em>✨ Professional change tracking for your projects ✨</em></p>
 
 <p align="center">✨Dvurechensky✨</p>
