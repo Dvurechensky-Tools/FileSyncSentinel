@@ -2,8 +2,8 @@
  * Author: Nikolay Dvurechensky
  * Site: https://dvurechensky.pro/
  * Gmail: dvurechenskysoft@gmail.com
- * Last Updated: 09 июня 2026 17:14:12
- * Version: 1.0.222
+ * Last Updated: 10 июня 2026 14:35:00
+ * Version: 1.0.223
  */
 
 namespace FileSyncSentinel
