@@ -48,7 +48,15 @@ namespace FileSyncSentinel.Services
                 foreach (var outFile in MergeConfigData.OutFiles)
                 {
                     if (!MergeConfigData.InFiles.TryGetValue(outFile.Key, out string inFilePath))
-                        continue; // нет такого файла в оригинале
+                    {
+                        inFilePath = Path.Combine(MergeConfigData.PathIn, outFile.Key);
+                        differentFiles.Add(new MergeItem(outFile.Key, outFile.Value) 
+                        { 
+                            BeforeItemPath = inFilePath,
+                            IsNew = true
+                        });
+                        continue;
+                    }
 
                     if (!File.Exists(inFilePath))
                         continue;
@@ -87,8 +95,12 @@ namespace FileSyncSentinel.Services
             MergeConfigData.FilesWatcher = new FileSystemWatcher(MergeConfigData.PathOut, 
                 MergeConfigData.TypeFiles);
             MergeConfigData.FilesWatcher.IncludeSubdirectories = true;
-            MergeConfigData.FilesWatcher.NotifyFilter = NotifyFilters.LastWrite;
+            MergeConfigData.FilesWatcher.NotifyFilter = NotifyFilters.LastWrite
+                | NotifyFilters.FileName
+                | NotifyFilters.DirectoryName;
             MergeConfigData.FilesWatcher.Changed += OnIniFileChanged;
+            MergeConfigData.FilesWatcher.Created += OnIniFileChanged;
+            MergeConfigData.FilesWatcher.Renamed += OnIniFileChanged;
             MergeConfigData.FilesWatcher.EnableRaisingEvents = true;
         }
 
@@ -175,14 +187,16 @@ namespace FileSyncSentinel.Services
         {
             if (!MergeConfigData.IsValid) return;
 
-            foreach (string outFile in Directory.GetFiles(MergeConfigData.PathOut, "*.ini", SearchOption.AllDirectories))
+            foreach (string outFile in Directory.GetFiles(MergeConfigData.PathOut, MergeConfigData.TypeFiles, SearchOption.AllDirectories))
             {
                 string relativePath = Path.GetRelativePath(MergeConfigData.PathOut, outFile);
                 string inFile = Path.Combine(MergeConfigData.PathIn, relativePath);
 
                 if (!File.Exists(inFile))
                 {
-                    // Не копируем — файла нет в папке In
+                    EnsureParentDirectoryExists(inFile);
+                    File.Copy(outFile, inFile, true);
+                    UpdateLogEvent?.Invoke(this, $"[+] Добавлен: {relativePath}");
                     continue;
                 }
 
@@ -193,7 +207,7 @@ namespace FileSyncSentinel.Services
                 }
 
                 File.Copy(outFile, inFile, true);
-                UpdateLogEvent.Invoke(this, $"[✓] Обновлён: {relativePath}");
+                UpdateLogEvent?.Invoke(this, $"[✓] Обновлён: {relativePath}");
             }
         }
 
@@ -208,12 +222,14 @@ namespace FileSyncSentinel.Services
             if (!File.Exists(inFilePath))
             {
                 // Если in-файла нет, просто копируем
+                EnsureParentDirectoryExists(inFilePath);
                 File.Copy(outFilePath, inFilePath, true);
                 UpdateLogEvent?.Invoke(this, $"[+] Скопирован новый файл: {inFilePath}");
                 return true;
             }
            
             // Файлы разные — копируем
+            EnsureParentDirectoryExists(inFilePath);
             File.Copy(outFilePath, inFilePath, true);
             UpdateLogEvent?.Invoke(this, $"[✓] Обновлён файл: {inFilePath}");
             return true;
@@ -221,8 +237,8 @@ namespace FileSyncSentinel.Services
 
         public async Task<DiffResult> ViewChangesAsync(string fileA, string fileB)
         {
-            var textA = await File.ReadAllTextAsync(fileA);
-            var textB = await File.ReadAllTextAsync(fileB);
+            var textA = File.Exists(fileA) ? await File.ReadAllTextAsync(fileA) : string.Empty;
+            var textB = File.Exists(fileB) ? await File.ReadAllTextAsync(fileB) : string.Empty;
 
             var diffBuilder = new InlineDiffBuilder(new Differ());
             var diff = diffBuilder.BuildDiffModel(textA, textB);
@@ -266,6 +282,15 @@ namespace FileSyncSentinel.Services
                 : Array.Empty<byte>();
 
             return !sourceHash.SequenceEqual(targetHash);
+        }
+
+        private void EnsureParentDirectoryExists(string filePath)
+        {
+            string? directory = Path.GetDirectoryName(filePath);
+            if (!string.IsNullOrEmpty(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
         }
 
         private string ComputeFastHash(string path)

@@ -117,7 +117,7 @@ namespace FileSyncSentinel
             {
                 HeaderText = "",
                 Text = "Применить",
-                UseColumnTextForButtonValue = true,
+                UseColumnTextForButtonValue = false,
                 Name = "ApplyButton",
                 Width = 90,
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.None
@@ -125,6 +125,19 @@ namespace FileSyncSentinel
             dataGridViewFileChanges.Columns.Add(applyBtn);
 
             dataGridViewFileChanges.CellClick += async (s, e) => await DataGridView1_CellClick(s, e);
+            dataGridViewFileChanges.CellFormatting += DataGridViewFileChanges_CellFormatting;
+        }
+
+        private void DataGridViewFileChanges_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.RowIndex < 0 || dataGridViewFileChanges.Columns[e.ColumnIndex].Name != "ApplyButton")
+                return;
+
+            if (dataGridViewFileChanges.Rows[e.RowIndex].DataBoundItem is MergeItem item)
+            {
+                e.Value = item.IsNew ? "Добавить" : "Применить";
+                e.FormattingApplied = true;
+            }
         }
 
         private async Task DataGridView1_CellClick(object? sender, DataGridViewCellEventArgs e)

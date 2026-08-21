@@ -1,99 +1,98 @@
-<p align="center">✨Dvurechensky✨</p>
+<p align="center">Dvurechensky</p>
 
-<p align="center"> 
-  <p align="center"> 
-    <h1 align="center">FileSync Sentinel 📁✨  <img alt="Static Badge" src="https://shields.dvurechensky.pro/badge/FileSync-Real%20Time%20Monitor-purple"></h1>
-  </p> 
-  <p align="center"> 
-    <img src="https://shields.dvurechensky.pro/badge/WinForms-.NET%208.0-blue?logo=dotnet&logoColor=white"> 
-    <img src="https://shields.dvurechensky.pro/badge/MVC-Architecture-blue?logo=windowsterminal&logoColor=white"> 
-    <img src="https://shields.dvurechensky.pro/badge/DiffPlex-Comparison-green?logo=git&logoColor=white"> 
-    <img src="https://shields.dvurechensky.pro/badge/FastColoredTextBox-Syntax%20Highlighting-orange?logo=visualstudiocode&logoColor=white"> 
-    <img src="https://shields.dvurechensky.pro/badge/JSON-Configuration-lightgrey?logo=json&logoColor=white"> 
-    <img src="https://shields.dvurechensky.pro/badge/Costura-Fody%20Packager-lightgrey?logo=packagist&logoColor=white"> 
-  </p> 
-  <h3 align="center"><span style="color:#F5F752;">Мощный</span> мониторинг изменений файлов в <span style="color:#377;">реальном времени</span> с <span style="color:#15F752;">интеллектуальным сравнением 🔍</span></h3>
+<h1 align="center">
+  FileSync Sentinel
+  <img alt="Static Badge" src="https://shields.dvurechensky.pro/badge/FileSync-Real%20Time%20Monitor-purple">
+</h1>
+
+<p align="center">
+  <img src="https://shields.dvurechensky.pro/badge/WinForms-.NET%208.0-blue?logo=dotnet&logoColor=white">
+  <img src="https://shields.dvurechensky.pro/badge/MVC-Architecture-blue?logo=windowsterminal&logoColor=white">
+  <img src="https://shields.dvurechensky.pro/badge/DiffPlex-Comparison-green?logo=git&logoColor=white">
+  <img src="https://shields.dvurechensky.pro/badge/FastColoredTextBox-Syntax%20Highlighting-orange?logo=visualstudiocode&logoColor=white">
+  <img src="https://shields.dvurechensky.pro/badge/JSON-Configuration-lightgrey?logo=json&logoColor=white">
 </p>
 
-<div align="center" style="margin: 20px 0; padding: 10px; background: #1c1917; border-radius: 10px;">
-  <strong>🌐 Язык: </strong>
-  
-  <span style="color: #F5F752; margin: 0 10px;">
-    ✅ 🇷🇺 Русский (текущий)
-  </span>
-  | 
-  <a href="./README.md" style="color: #0891b2; margin: 0 10px;">
-    🇺🇸 English
-  </a>
-</div>
+<p align="center">
+  Я разрабатываю FileSync Sentinel как компактный desktop-инструмент для контроля изменений между рабочей и эталонной папкой.
+</p>
+
+<p align="center">
+  <strong>Язык:</strong>
+  Русский (текущий) |
+  <a href="./README.md">English</a>
+</p>
 
 ---
 
-- [🚀 О проекте](#-о-проекте)
-  - [🎯 Основные задачи](#-основные-задачи)
-- [🛠 Технологии](#-технологии)
-- [🚀 Установка и запуск](#-установка-и-запуск)
-  - [Актуальная версия](#актуальная-версия)
-  - [Системные требования](#системные-требования)
-- [⚡ Быстрый старт](#-быстрый-старт)
+## О проекте
 
-## 🚀 О проекте
+**FileSync Sentinel** - это WinForms-приложение, которое я сделал для локального мониторинга файлов без внешнего репозитория и лишней инфраструктуры. Я использую его как быстрый способ видеть, какие файлы изменились в рабочей папке `Out`, сравнивать их с эталоном `In` и выборочно переносить нужные изменения.
 
-**FileSync Sentinel** - это профессиональная система мониторинга, созданная для потоковой работы в реальном времени. Приложение обеспечивает точное отслеживание только `изменений` файлов конкретного расширения с возможностью интеллектуального сравнения и синхронизации.
+Проект особенно полезен, когда нужно регулярно сверять большое количество конфигурационных файлов, например `*.ini`, и аккуратно переносить только подтвержденные изменения.
 
-_🛠 Что-то вроде портативного Github Desktop но без внешнего репозитория где-либо и с ограниченными возможностями 💖_
+![FileSync Sentinel interface](docs/FileSyncSentinelInfo.gif)
 
-![alt text](docs/FileSyncSentinelInfo.gif)
+## Возможности
 
-### 🎯 Основные задачи
-
-- **Наблюдение за папкой `Out`** (`LizeriumChangesGame`) - отслеживание `изменений` файлов в течение дня
-- **Сравнение с папкой `In`** (`LizeriumINI`) - эталонная директория для сравнения
-- **Гибкая настройка форматов** - точное указание отслеживаемых файлов (поддержка десятков тысяч `.ini` файлов)
-- **Детальное логирование** - фиксация всех изменений в лог-файл
-- **Визуальное сравнение** - просмотр точных изменений между файлами
-- **Интеллектуальная синхронизация** - применение изменений к файлам или папкам одной кнопкой
+- Отслеживаю изменения и новые файлы в папке `Out`, включая вложенные директории.
+- Сравниваю файлы с эталонной папкой `In` по относительным путям.
+- Показываю список измененных и новых файлов в интерфейсе.
+- Для новых файлов вывожу действие **Добавить**, для измененных - **Применить**.
+- Позволяю просматривать различия через визуальную панель сравнения.
+- Копирую отдельный файл или применяю все найденные изменения сразу.
+- Создаю недостающие подпапки в `In` при добавлении новых файлов.
+- Веду журнал событий мониторинга и синхронизации.
 
 > [!IMPORTANT]
-> FileSync Sentinel 📁 смотрит только за `изменениями` уже `существующих` файлов в папке `Out`! Не за их созданием где либо, а строго за `изменениями`.
+> Я отслеживаю только файлы, подходящие под маску из конфигурации, например `*.ini` или `*.json`.
 
-## 🛠 Технологии
+## Технологии
 
-- **WinForms** - современный desktop интерфейс
-- **NET 8.0** - последняя версия фреймворка
-- **MVC Pattern** - чистая архитектура приложения
-- **NuGet пакеты:**
-  - `DiffPlex` - интеллектуальное сравнение файлов
-  - `Newtonsoft.Json` - работа с конфигурацией
-- **Дополнительные компоненты:**
-  - **FastColoredTextBoxNet8** - кастомная реализация для .NET 8.0 (форк библиотеки [Pavel Torgashov](https://github.com/PavelTorgashov/FastColoredTextBox))
-  - **Подсветка различий** - как в `VSCode`, `WinMerge`, `Beyond Compare`
+- **.NET 8.0 / Windows Desktop** - основа приложения.
+- **WinForms** - простой и предсказуемый desktop-интерфейс.
+- **MVC-подход** - разделение представления, презентера и сервисов.
+- **DiffPlex** - построение текстовых различий.
+- **Newtonsoft.Json** - чтение конфигурации.
+- **FastColoredTextBoxNet8** - панель просмотра и подсветки различий.
+- **Costura.Fody** - упаковка зависимостей.
 
-## 🚀 Установка и запуск
+## Установка и запуск
 
-### Актуальная версия
+### Готовая версия
 
-Доступна в разделе **Release** проекта
+Актуальная сборка доступна в разделе **Releases** проекта.
 
 ### Системные требования
 
-- **.NET 8.0 Desktop Runtime**
-  - [x64 версия](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-8.0.18-windows-x64-installer)
-  - [x86 версия](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-8.0.18-windows-x86-installer)
+- Windows
+- .NET 8.0 Desktop Runtime:
+  - [x64 installer](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-8.0.18-windows-x64-installer)
+  - [x86 installer](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-8.0.18-windows-x86-installer)
 
-## ⚡ Быстрый старт
+## Быстрый старт
 
-1. Скачайте и установите `.NET 8.0 Desktop Runtime`
-2. Загрузите последнюю версию из раздела `Release`
-3. Настройте `пути` к папкам `в конфигурации`
-4. Укажите отслеживаемый `формат` файлов
-5. Запустите мониторинг!
+1. Установите `.NET 8.0 Desktop Runtime`.
+2. Скачайте последнюю версию из `Releases`.
+3. Откройте файл конфигурации из меню приложения.
+4. Укажите путь к эталонной папке `In`.
+5. Укажите путь к рабочей папке `Out`.
+6. Задайте маску файлов, например `*.ini`.
+7. Запустите мониторинг или выполните ручное сканирование.
 
-> [!IMPORTANT]
-> FileSync Sentinel 📁 смотрит только за одним конкретным `расширением` файлов в папке `Out`, например только за `*.ini` если укажете или за `*.json`!
+## Принцип работы
+
+Я считаю относительный путь файла внутри `Out` главным идентификатором. Если такой же путь есть в `In`, приложение сравнивает содержимое и показывает изменение. Если файла в `In` еще нет, приложение помечает его как новый и предлагает добавить.
+
+При применении изменений FileSync Sentinel копирует файл из `Out` в соответствующее место внутри `In`. Если нужной подпапки нет, она создается автоматически.
+
+## История изменений
+
+- [CHANGELOG.ru.md](./CHANGELOG.ru.md) - история изменений на русском языке.
+- [CHANGELOG.md](./CHANGELOG.md) - changelog in English.
 
 ---
 
-<p align="center"><em>✨ Профессиональный контроль изменений для ваших проектов ✨</em></p>
+<p align="center"><em>Профессиональный локальный контроль изменений для рабочих файлов.</em></p>
 
-<p align="center">✨Dvurechensky✨</p>
+<p align="center">Dvurechensky</p>

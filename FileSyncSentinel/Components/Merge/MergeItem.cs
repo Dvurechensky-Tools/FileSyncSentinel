@@ -19,5 +19,6 @@ namespace FileSyncSentinel.Components
         public string Relative {  get; set; }
         public string Full {  get; set; }
         public string BeforeItemPath { get; set; }
+        public bool IsNew { get; set; }
     }
 }
