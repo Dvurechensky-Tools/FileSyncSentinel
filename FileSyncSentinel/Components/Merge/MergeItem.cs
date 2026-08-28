@@ -2,12 +2,19 @@
  * Author: Nikolay Dvurechensky
  * Site: https://dvurechensky.pro/
  * Gmail: dvurechenskysoft@gmail.com
- * Last Updated: 27 августа 2026 08:53:36
- * Version: 1.0.301
+ * Last Updated: 28 августа 2026 07:13:46
+ * Version: 1.0.302
  */
 
 namespace FileSyncSentinel.Components
 {
+    public enum MergeChangeType
+    {
+        Modified,
+        Added,
+        Deleted
+    }
+
     public class MergeItem
     {
         public MergeItem(string relative, string full)
@@ -18,7 +25,17 @@ namespace FileSyncSentinel.Components
 
         public string Relative {  get; set; }
         public string Full {  get; set; }
-        public string BeforeItemPath { get; set; }
-        public bool IsNew { get; set; }
+        public string BeforeItemPath { get; set; } = string.Empty;
+        public MergeChangeType ChangeType { get; set; } = MergeChangeType.Modified;
+        public bool IsNew
+        {
+            get => ChangeType == MergeChangeType.Added;
+            set
+            {
+                if (value)
+                    ChangeType = MergeChangeType.Added;
+            }
+        }
+        public bool IsDeleted => ChangeType == MergeChangeType.Deleted;
     }
 }

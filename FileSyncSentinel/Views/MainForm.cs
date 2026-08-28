@@ -2,8 +2,8 @@
  * Author: Nikolay Dvurechensky
  * Site: https://dvurechensky.pro/
  * Gmail: dvurechenskysoft@gmail.com
- * Last Updated: 27 августа 2026 08:53:36
- * Version: 1.0.301
+ * Last Updated: 28 августа 2026 07:13:46
+ * Version: 1.0.302
  */
 
 using System.Diagnostics;
@@ -39,6 +39,11 @@ namespace FileSyncSentinel
         private MainPresenter Presenter { get; set; }
         private IMergeService MergeService { get; set; }
         private ISettingsService SettingsService { get; set; }
+        private readonly List<MergeItem> _allChangeItems = new();
+        private readonly List<MergeItem> _visibleChangeItems = new();
+        private TextBox textBoxChangeSearch = null!;
+        private TextBox textBoxChangeExclusions = null!;
+        private Panel changesGridPanel = null!;
 
         public MainForm()
         {
@@ -55,6 +60,9 @@ namespace FileSyncSentinel
             timerLookChanges.Tick += async (s, e) => await LookTimer_TickAsync(s, e);
             timerLookChanges.Start();
             InitDataGridView();
+            InitChangeFiltersPanel();
+            Resize += (s, e) => ResizeComparisonPanels();
+            ResizeComparisonPanels();
         }
 
         private void InitDataGridView()
@@ -65,6 +73,12 @@ namespace FileSyncSentinel
             dataGridViewFileChanges.RowHeadersVisible = false;
             dataGridViewFileChanges.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dataGridViewFileChanges.MultiSelect = false;
+            dataGridViewFileChanges.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
+            dataGridViewFileChanges.RowTemplate.Height = 30;
+            dataGridViewFileChanges.ColumnHeadersHeight = 34;
+            dataGridViewFileChanges.Font = new Font("Segoe UI", 10F);
+            dataGridViewFileChanges.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            dataGridViewFileChanges.ScrollBars = ScrollBars.Both;
 
             // Колонка с текстом
             var textColumn = new DataGridViewTextBoxColumn
@@ -72,18 +86,31 @@ namespace FileSyncSentinel
                 DataPropertyName = "Relative",
                 HeaderText = "Файл",
                 ReadOnly = true,
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+                MinimumWidth = 420,
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
+                FillWeight = 100
             };
             dataGridViewFileChanges.Columns.Add(textColumn);
+
+            var changeTypeColumn = new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = "ChangeType",
+                HeaderText = "Тип",
+                ReadOnly = true,
+                Name = "ChangeTypeColumn",
+                Width = 105,
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.None
+            };
+            dataGridViewFileChanges.Columns.Add(changeTypeColumn);
 
             // Кнопка "Открыть"
             var changesnBtn = new DataGridViewButtonColumn
             {
                 HeaderText = "",
-                Text = "Изменения",
-                UseColumnTextForButtonValue = true,
+                Text = "Сравнить",
+                UseColumnTextForButtonValue = false,
                 Name = "ChangesButton",
-                Width = 90,
+                Width = 98,
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.None
             };
             dataGridViewFileChanges.Columns.Add(changesnBtn);
@@ -92,10 +119,10 @@ namespace FileSyncSentinel
             var openOutBtn = new DataGridViewButtonColumn
             {
                 HeaderText = "",
-                Text = "Открыть изменённую",
-                UseColumnTextForButtonValue = true,
+                Text = "Открыть изм.",
+                UseColumnTextForButtonValue = false,
                 Name = "OpenOutButton",
-                Width = 150,
+                Width = 125,
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.None
             };
             dataGridViewFileChanges.Columns.Add(openOutBtn);
@@ -105,7 +132,7 @@ namespace FileSyncSentinel
             {
                 HeaderText = "",
                 Text = "Открыть эталон",
-                UseColumnTextForButtonValue = true,
+                UseColumnTextForButtonValue = false,
                 Name = "OpenInButton",
                 Width = 130,
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.None
@@ -119,37 +146,151 @@ namespace FileSyncSentinel
                 Text = "Применить",
                 UseColumnTextForButtonValue = false,
                 Name = "ApplyButton",
-                Width = 90,
+                Width = 120,
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.None
             };
             dataGridViewFileChanges.Columns.Add(applyBtn);
 
             dataGridViewFileChanges.CellClick += async (s, e) => await DataGridView1_CellClick(s, e);
             dataGridViewFileChanges.CellFormatting += DataGridViewFileChanges_CellFormatting;
+            dataGridViewFileChanges.RowPrePaint += DataGridViewFileChanges_RowPrePaint;
+        }
+
+        private void InitChangeFiltersPanel()
+        {
+            changesGridPanel = new Panel
+            {
+                Dock = DockStyle.Fill,
+                Padding = new Padding(0)
+            };
+
+            tabPage2.Controls.Remove(dataGridViewFileChanges);
+            changesGridPanel.Controls.Add(dataGridViewFileChanges);
+            tabPage2.Controls.Add(changesGridPanel);
+            changesGridPanel.BringToFront();
+
+            var filterPanel = new TableLayoutPanel
+            {
+                Dock = DockStyle.Top,
+                Height = 48,
+                ColumnCount = 4,
+                RowCount = 1,
+                Padding = new Padding(8, 7, 8, 6),
+                BackColor = SystemColors.Control
+            };
+            filterPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 70));
+            filterPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 45));
+            filterPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 95));
+            filterPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 55));
+
+            var searchLabel = new Label
+            {
+                Text = "Поиск",
+                Dock = DockStyle.Fill,
+                TextAlign = ContentAlignment.MiddleLeft
+            };
+            var exclusionsLabel = new Label
+            {
+                Text = "Исключить",
+                Dock = DockStyle.Fill,
+                TextAlign = ContentAlignment.MiddleLeft
+            };
+
+            textBoxChangeSearch = new TextBox
+            {
+                Dock = DockStyle.Fill,
+                PlaceholderText = "Файл или часть пути"
+            };
+            textBoxChangeExclusions = new TextBox
+            {
+                Dock = DockStyle.Fill,
+                PlaceholderText = "Подпапка или путь; можно несколько через ;"
+            };
+
+            textBoxChangeSearch.TextChanged += (s, e) => ApplyChangeFilters();
+            textBoxChangeExclusions.TextChanged += (s, e) => ApplyChangeFilters();
+
+            filterPanel.Controls.Add(searchLabel, 0, 0);
+            filterPanel.Controls.Add(textBoxChangeSearch, 1, 0);
+            filterPanel.Controls.Add(exclusionsLabel, 2, 0);
+            filterPanel.Controls.Add(textBoxChangeExclusions, 3, 0);
+
+            changesGridPanel.Controls.Add(filterPanel);
+            filterPanel.BringToFront();
         }
 
         private void DataGridViewFileChanges_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (e.RowIndex < 0 || dataGridViewFileChanges.Columns[e.ColumnIndex].Name != "ApplyButton")
+            if (e.RowIndex < 0)
                 return;
 
             if (dataGridViewFileChanges.Rows[e.RowIndex].DataBoundItem is MergeItem item)
             {
-                e.Value = item.IsNew ? "Добавить" : "Применить";
-                e.FormattingApplied = true;
+                var columnName = dataGridViewFileChanges.Columns[e.ColumnIndex].Name;
+
+                if (columnName == "ChangeTypeColumn")
+                {
+                    e.Value = GetChangeTypeText(item);
+                    e.FormattingApplied = true;
+                }
+                else if (columnName == "ApplyButton")
+                {
+                    e.Value = item.ChangeType == MergeChangeType.Deleted ? "Удалить" :
+                        item.IsNew ? "Добавить" : "Применить";
+                    e.FormattingApplied = true;
+                }
+                else if (columnName == "ChangesButton")
+                {
+                    e.Value = "Сравнить";
+                    e.FormattingApplied = true;
+                }
+                else if (columnName == "OpenOutButton")
+                {
+                    e.Value = item.IsDeleted ? "Нет файла" : "Открыть изм.";
+                    e.FormattingApplied = true;
+                }
+                else if (columnName == "OpenInButton")
+                {
+                    e.Value = "Открыть эталон";
+                    e.FormattingApplied = true;
+                }
             }
+        }
+
+        private void DataGridViewFileChanges_RowPrePaint(object? sender, DataGridViewRowPrePaintEventArgs e)
+        {
+            if (e.RowIndex < 0 || dataGridViewFileChanges.Rows[e.RowIndex].DataBoundItem is not MergeItem item)
+                return;
+
+            var color = item.ChangeType switch
+            {
+                MergeChangeType.Added => Color.FromArgb(224, 255, 224),
+                MergeChangeType.Deleted => Color.FromArgb(255, 224, 224),
+                _ => Color.FromArgb(255, 250, 205)
+            };
+
+            dataGridViewFileChanges.Rows[e.RowIndex].DefaultCellStyle.BackColor = color;
+            dataGridViewFileChanges.Rows[e.RowIndex].DefaultCellStyle.SelectionBackColor = ControlPaint.Dark(color);
+            dataGridViewFileChanges.Rows[e.RowIndex].DefaultCellStyle.SelectionForeColor = Color.Black;
         }
 
         private async Task DataGridView1_CellClick(object? sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex < 0) return; // заголовки
+            if (e.RowIndex < 0 || e.ColumnIndex < 0 || sender is not DataGridView grid) return; // заголовки
 
-            var grid = (DataGridView)sender;
             var item = (MergeItem)grid.Rows[e.RowIndex].DataBoundItem;
             var column = grid.Columns[e.ColumnIndex];
 
             if (column.Name == "OpenOutButton")
+            {
+                if (item.IsDeleted)
+                {
+                    AppendLog($"[!] Изменённый файл отсутствует: {item.Full}");
+                    return;
+                }
+
                 Presenter.OpenFile(item.Full);
+            }
             if (column.Name == "OpenInButton")
                 Presenter.OpenFile(item.BeforeItemPath);
             else if (column.Name == "ApplyButton")
@@ -157,7 +298,10 @@ namespace FileSyncSentinel
             else if (column.Name == "ChangesButton")
             {
                 ClearAllChangesPanel();
-                await Presenter.ViewChangesAsync(item.Full, item.BeforeItemPath);
+                if (item.IsDeleted)
+                    await Presenter.ViewChangesAsync(item.BeforeItemPath, item.Full);
+                else
+                    await Presenter.ViewChangesAsync(item.Full, item.BeforeItemPath);
                 tabControl1.SelectedIndex = 2;
             }
         }
@@ -200,7 +344,7 @@ namespace FileSyncSentinel
 
         private async void LookMenuItem_ClickAsync(object sender, EventArgs e) => await Presenter.Look();
 
-        private void MergeMenuItem_Click(object sender, EventArgs e) => Presenter.Merge();
+        private async void MergeMenuItem_Click(object sender, EventArgs e) => await Presenter.ApplyChanges(_visibleChangeItems.ToList());
 
         public void SetupLeftTextFile(string text) => fastColoredTextBoxLeft.AppendText(text + Environment.NewLine);
 
@@ -214,6 +358,17 @@ namespace FileSyncSentinel
         {
             fastColoredTextBoxLeft.Clear();
             fastColoredTextBoxRight.Clear();
+        }
+
+        private void ResizeComparisonPanels()
+        {
+            var availableWidth = tabPage3.ClientSize.Width - tabPage3.Padding.Horizontal;
+            if (availableWidth <= 0)
+                return;
+
+            var panelWidth = availableWidth / 2;
+            fastColoredTextBoxLeft.Width = panelWidth;
+            fastColoredTextBoxRight.Width = availableWidth - panelWidth;
         }
 
         public void AppendLog(string msg, bool isDate = false)
@@ -241,8 +396,31 @@ namespace FileSyncSentinel
 
         public void UpdateChangesBox(List<MergeItem> mergeItems)
         {
+            _allChangeItems.Clear();
+            _allChangeItems.AddRange(mergeItems);
+            ApplyChangeFilters();
+        }
+
+        private void ApplyChangeFilters()
+        {
+            if (textBoxChangeSearch == null || textBoxChangeExclusions == null)
+                return;
+
+            _visibleChangeItems.Clear();
+            _visibleChangeItems.AddRange(ChangeListFilter.Filter(_allChangeItems, textBoxChangeSearch.Text, textBoxChangeExclusions.Text));
+
             dataGridViewFileChanges.DataSource = null;
-            dataGridViewFileChanges.DataSource = mergeItems;
+            dataGridViewFileChanges.DataSource = _visibleChangeItems.ToList();
+        }
+
+        private static string GetChangeTypeText(MergeItem item)
+        {
+            return item.ChangeType switch
+            {
+                MergeChangeType.Added => "Добавление",
+                MergeChangeType.Deleted => "Удаление",
+                _ => "Изменение"
+            };
         }
 
         public void HighlightLine(bool isLeft, int lineIndex, Color color)

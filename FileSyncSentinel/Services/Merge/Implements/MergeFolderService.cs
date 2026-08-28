@@ -2,8 +2,8 @@
  * Author: Nikolay Dvurechensky
  * Site: https://dvurechensky.pro/
  * Gmail: dvurechenskysoft@gmail.com
- * Last Updated: 27 августа 2026 08:53:36
- * Version: 1.0.301
+ * Last Updated: 28 августа 2026 07:13:46
+ * Version: 1.0.302
  */
 
 
@@ -47,13 +47,13 @@ namespace FileSyncSentinel.Services
             {
                 foreach (var outFile in MergeConfigData.OutFiles)
                 {
-                    if (!MergeConfigData.InFiles.TryGetValue(outFile.Key, out string inFilePath))
+                    if (!MergeConfigData.InFiles.TryGetValue(outFile.Key, out var inFilePath))
                     {
                         inFilePath = Path.Combine(MergeConfigData.PathIn, outFile.Key);
                         differentFiles.Add(new MergeItem(outFile.Key, outFile.Value) 
                         { 
                             BeforeItemPath = inFilePath,
-                            IsNew = true
+                            ChangeType = MergeChangeType.Added
                         });
                         continue;
                     }
@@ -68,18 +68,38 @@ namespace FileSyncSentinel.Services
                     var outInfo = new FileInfo(outFile.Value);
                     if (inInfo.Length != outInfo.Length)
                     {
-                        differentFiles.Add(new MergeItem(outFile.Key, outFile.Value) { BeforeItemPath = inFilePath });
+                        differentFiles.Add(new MergeItem(outFile.Key, outFile.Value) 
+                        { 
+                            BeforeItemPath = inFilePath,
+                            ChangeType = MergeChangeType.Modified
+                        });
                         continue;
                     }
 
                     // Второй уровень (опционально): быстрый хеш
                     if (ComputeFastHash(inFilePath) != ComputeFastHash(outFile.Value))
                     {
-                        differentFiles.Add(new MergeItem(outFile.Key, outFile.Value) { BeforeItemPath = inFilePath });
+                        differentFiles.Add(new MergeItem(outFile.Key, outFile.Value) 
+                        { 
+                            BeforeItemPath = inFilePath,
+                            ChangeType = MergeChangeType.Modified
+                        });
                     }
                 }
+
+                foreach (var inFile in MergeConfigData.InFiles)
+                {
+                    if (MergeConfigData.OutFiles.ContainsKey(inFile.Key))
+                        continue;
+
+                    differentFiles.Add(new MergeItem(inFile.Key, Path.Combine(MergeConfigData.PathOut, inFile.Key))
+                    {
+                        BeforeItemPath = inFile.Value,
+                        ChangeType = MergeChangeType.Deleted
+                    });
+                }
             }
-            catch (Exception ex) { }
+            catch (Exception) { }
             finally { }
             return differentFiles;
         }
@@ -187,28 +207,7 @@ namespace FileSyncSentinel.Services
         {
             if (!MergeConfigData.IsValid) return;
 
-            foreach (string outFile in Directory.GetFiles(MergeConfigData.PathOut, MergeConfigData.TypeFiles, SearchOption.AllDirectories))
-            {
-                string relativePath = Path.GetRelativePath(MergeConfigData.PathOut, outFile);
-                string inFile = Path.Combine(MergeConfigData.PathIn, relativePath);
-
-                if (!File.Exists(inFile))
-                {
-                    EnsureParentDirectoryExists(inFile);
-                    File.Copy(outFile, inFile, true);
-                    UpdateLogEvent?.Invoke(this, $"[+] Добавлен: {relativePath}");
-                    continue;
-                }
-
-                if (!CompareFiles(outFile, inFile))
-                {
-                    // Пропускаем одинаковые
-                    continue;
-                }
-
-                File.Copy(outFile, inFile, true);
-                UpdateLogEvent?.Invoke(this, $"[✓] Обновлён: {relativePath}");
-            }
+            ApplyChanges(LookChangesFiles());
         }
 
         public bool MergeSingleFile(string outFilePath, string inFilePath)
@@ -233,6 +232,37 @@ namespace FileSyncSentinel.Services
             File.Copy(outFilePath, inFilePath, true);
             UpdateLogEvent?.Invoke(this, $"[✓] Обновлён файл: {inFilePath}");
             return true;
+        }
+
+        public bool ApplyChange(MergeItem item)
+        {
+            if (item.ChangeType == MergeChangeType.Deleted)
+            {
+                if (!File.Exists(item.BeforeItemPath))
+                {
+                    UpdateLogEvent?.Invoke(this, $"[!] Эталон уже удалён: {item.BeforeItemPath}");
+                    return false;
+                }
+
+                File.Delete(item.BeforeItemPath);
+                UpdateLogEvent?.Invoke(this, $"[-] Удалён файл: {item.BeforeItemPath}");
+                return true;
+            }
+
+            return MergeSingleFile(item.Full, item.BeforeItemPath);
+        }
+
+        public int ApplyChanges(IEnumerable<MergeItem> items)
+        {
+            var applied = 0;
+
+            foreach (var item in items)
+            {
+                if (ApplyChange(item))
+                    applied++;
+            }
+
+            return applied;
         }
 
         public async Task<DiffResult> ViewChangesAsync(string fileA, string fileB)

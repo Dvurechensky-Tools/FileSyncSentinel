@@ -1,3 +1,19 @@
+## 27.08.2026
+
+### Added
+
+- Added deleted-file detection for files removed from `Out` but still present in `In`.
+- Added change type labels and color-coded rows for added, modified, and deleted files.
+- Added search and path exclusions to the changes list.
+- Added visible-list bulk apply for currently filtered changes.
+
+### Changed
+
+- Single and bulk apply now route through typed change actions, including delete operations.
+- The main window is now resizable and starts wider so change actions remain readable.
+- The changes grid now uses shorter action labels and wider action columns.
+- The comparison panel now resizes both text panes with the window.
+
 ## 21.08.2026
 
 ### Added

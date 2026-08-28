@@ -2,8 +2,8 @@
  * Author: Nikolay Dvurechensky
  * Site: https://dvurechensky.pro/
  * Gmail: dvurechenskysoft@gmail.com
- * Last Updated: 27 августа 2026 08:53:36
- * Version: 1.0.301
+ * Last Updated: 28 августа 2026 07:13:46
+ * Version: 1.0.302
  */
 
 
@@ -59,8 +59,15 @@ namespace FileSyncSentinel.Presenter
         /// <param name="item"></param>
         public async Task ApplyChanges(MergeItem item)
         {
-            bool state = MergeService.MergeSingleFile(item.Full, item.BeforeItemPath);
+            bool state = MergeService.ApplyChange(item);
             if (state) await Look();
+        }
+
+        public async Task ApplyChanges(IEnumerable<MergeItem> items)
+        {
+            int applied = MergeService.ApplyChanges(items);
+            view.AppendLog($"[✓] Массово применено изменений: {applied}");
+            if (applied > 0) await Look();
         }
 
         /// <summary>

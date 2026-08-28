@@ -2,8 +2,8 @@
  * Author: Nikolay Dvurechensky
  * Site: https://dvurechensky.pro/
  * Gmail: dvurechenskysoft@gmail.com
- * Last Updated: 27 августа 2026 08:53:36
- * Version: 1.0.301
+ * Last Updated: 28 августа 2026 07:13:46
+ * Version: 1.0.302
  */
 
 
@@ -398,16 +398,13 @@ namespace FileSyncSentinel
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(984, 661);
+            ClientSize = new Size(1384, 811);
             Controls.Add(tabControl1);
             Controls.Add(menuStrip1);
             Icon = (Icon)resources.GetObject("$this.Icon");
             MainMenuStrip = menuStrip1;
-            MaximizeBox = false;
-            MaximumSize = new Size(1000, 700);
             MdiChildrenMinimizedAnchorBottom = false;
-            MinimizeBox = false;
-            MinimumSize = new Size(1000, 700);
+            MinimumSize = new Size(1100, 720);
             Name = "MainForm";
             StartPosition = FormStartPosition.CenterParent;
             Text = "Монитор изменений в папках";
